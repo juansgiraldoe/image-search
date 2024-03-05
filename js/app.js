@@ -1,6 +1,7 @@
 const resultado = document.querySelector('#resultado');
 const formulario = document.querySelector('#formulario');
 const paginacion = document.querySelector('#paginacion');
+let paginaActual = 1;
 
 const registros = 40;
 let totalPaginas;
@@ -14,19 +15,19 @@ function validarForm(e) {
   e.preventDefault();
   
   const termino = document.querySelector('#termino').value;
-
+  
   if(termino === ''){
     mostrarAlerta('No puede ir vacio.');
     return;
   };
-
-  buscarImagenes(termino);
+  
+  buscarImagenes();
   formulario.reset();
 };
 
 function mostrarAlerta(mensaje) {
   const existeAlerta = document.querySelector('.bg-red-100');
-
+  
   if (!existeAlerta) {
     const alerta = document.createElement('P');
     alerta.classList.add('bg-red-100', 'border-red-400', 'text-red-700', 'px-4', 'py-3','rounded', 'max-w-lg', 'mx-auto', 'mt-6', 'text-center');
@@ -34,31 +35,32 @@ function mostrarAlerta(mensaje) {
     const alertaTitle = document.createElement('STRONG');
     alertaTitle.classList.add('font-bold', 'block');
     alertaTitle.textContent = '¡Error!';
-  
+    
     const alertaBody = document.createElement('SPAN');
     alertaBody.classList.add('block', 'sm:inline');
     alertaBody.textContent = `${mensaje}`;
-  
+    
     alerta.appendChild(alertaTitle);
     alerta.appendChild(alertaBody);
-  
+    
     formulario.appendChild(alerta);
-  
+    
     setTimeout(() => {
       alerta.remove();
     }, 2000);
   };
 };
 
-function buscarImagenes(termino) {
+function buscarImagenes() {
+  const termino = document.querySelector('#termino').value;
   const key = `42711393-64e9934e79e15f876d7d22c71`;
-  const url = `https://pixabay.com/api/?key=${key}&q=${termino}&per_page=${registros}`;
+  const url = `https://pixabay.com/api/?key=${key}&q=${termino}&per_page=${registros}&page=${paginaActual}`;
   fetch(url)
-    .then(res => res.json())
-    .then(res => {
-      totalPaginas = calcularPaginas(res.totalHits);
-      mostrarImagenes(res.hits);
-    });
+  .then(res => res.json())
+  .then(res => {
+    totalPaginas = calcularPaginas(res.totalHits);
+    mostrarImagenes(res.hits);
+  });
 };
 
 //Generador para la paginación.
@@ -105,7 +107,12 @@ function imprimirPaginas() {
     btn.href = '#';
     btn.dataset.pagina = value;
     btn.textContent = value;
-    btn.classList.add('siguiente', 'bg-yellow-400', 'px-4', 'py-1', 'mr-2', 'font-bold', 'mb-2', 'uppercase', 'rounded');
+    btn.classList.add('siguiente', 'bg-yellow-400', 'px-4', 'py-1', 'mr-2', 'font-bold', 'mb-2', 'rounded');
+    btn.onclick = () => {
+      paginaActual = value
+      buscarImagenes();
+    }
+
     paginacion.appendChild(btn);
   };
 };
