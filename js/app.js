@@ -1,8 +1,10 @@
 const resultado = document.querySelector('#resultado');
 const formulario = document.querySelector('#formulario');
+const paginacion = document.querySelector('#paginacion');
 
 const registros = 40;
 let totalPaginas;
+let iterador;
 
 window.onload = () => {
   formulario.addEventListener('submit', validarForm);
@@ -50,13 +52,20 @@ function mostrarAlerta(mensaje) {
 
 function buscarImagenes(termino) {
   const key = `42711393-64e9934e79e15f876d7d22c71`;
-  const url = `https://pixabay.com/api/?key=${key}&q=${termino}&per_page=50`;
+  const url = `https://pixabay.com/api/?key=${key}&q=${termino}&per_page=${registros}`;
   fetch(url)
     .then(res => res.json())
     .then(res => {
       totalPaginas = calcularPaginas(res.totalHits);
       mostrarImagenes(res.hits);
     });
+};
+
+//Generador para la paginación.
+function *crearPaginador(total) {
+  for (let index = 1; index <= total; index++) {
+    yield index;
+  };
 };
 
 function calcularPaginas(total) {
@@ -81,6 +90,24 @@ function mostrarImagenes(imagenes) {
       </div>
     `;
   });
+  while (paginacion.firstChild) {
+    paginacion.removeChild(paginacion.firstChild)
+  }
+  imprimirPaginas();
+};
+
+function imprimirPaginas() {
+  iterador = crearPaginador(totalPaginas);
+  while (true) {
+    const {value, done} = iterador.next();
+    if (done) return
+    const btn = document.createElement('A');
+    btn.href = '#';
+    btn.dataset.pagina = value;
+    btn.textContent = value;
+    btn.classList.add('siguiente', 'bg-yellow-400', 'px-4', 'py-1', 'mr-2', 'font-bold', 'mb-2', 'uppercase', 'rounded');
+    paginacion.appendChild(btn);
+  };
 };
 
 function limpiarHtml(){
