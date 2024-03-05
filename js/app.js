@@ -13,7 +13,10 @@ function validarForm(e) {
   if(termino === ''){
     mostrarAlerta('No puede ir vacio.');
     return;
-  }
+  };
+
+  buscarImagenes(termino);
+  formulario.reset();
 };
 
 function mostrarAlerta(mensaje) {
@@ -39,5 +42,41 @@ function mostrarAlerta(mensaje) {
     setTimeout(() => {
       alerta.remove();
     }, 2000);
+  };
+};
+
+function buscarImagenes(termino) {
+  const key = `42711393-64e9934e79e15f876d7d22c71`;
+  const url = `https://pixabay.com/api/?key=${key}&q=${termino}&per_page=50`;
+  fetch(url)
+    .then(res => res.json())
+    .then(res => {
+      mostrarImagenes(res.hits);
+    });
+};
+
+function mostrarImagenes(imagenes) {
+  limpiarHtml();
+  imagenes.forEach(imagen => {
+    const { previewURL, likes, views, largeImageURL } = imagen
+    resultado.innerHTML += `
+      <div class="w-1/2 md:w-1/3 lg:w-1/4 p-3 mb-4">
+        <div class="bg-white rounded-lg overflow-hidden">
+          <img class="w-full rounded-lg py-2 px-2" src="${previewURL}">
+          <div class="p-4 flex justify-start">
+            <p class="font-bold">${likes} <span class="font-light">Likes</span></p> <span class="mx-2">|</span>
+            <p class="font-bold">${views} <span class="font-light">Veces vista</span></p>
+          </div>
+          <a class="w-auto bg-blue-800 hover:bg-blue-500 text-white uppercase font-bold text-center rounded-md my-2 mx-2 block" 
+          href="${largeImageURL}" target="_blank" rel="noopener noreferrer">Ver imagen</a>
+        </div>
+      </div>
+    `;
+  });
+};
+
+function limpiarHtml(){
+  while (resultado.firstChild) {
+    resultado.removeChild(resultado.firstChild)
   };
 };
